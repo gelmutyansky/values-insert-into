@@ -87,4 +87,5 @@ function example(billIncomeType, projectId, profileIdCustomer, innCustomer, orga
     }
     
     const queryInsertBills = `INSERT INTO npdbills (` + helpers.customJoin(columns, ', ', '"') + ') VALUES ' + helpers.valuesInsertIntoV2(paramsInsertBills.length, columns.length, constParams) + ' RETURNING id';
+    const resInsertBills = await client.query(queryInsertBills, paramsInsertBills);
 }
