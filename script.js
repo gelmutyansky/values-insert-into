@@ -59,3 +59,32 @@ function valuesInsertIntoV2(paramsLength, allColumns, constantParamsLength = 0){
 
     return res.join();
 }
+
+/**
+ * Кастомная генерация строк с join
+ * @param {Array} array - массив строк
+ * @param {string} join - разделение
+ * @param {string} beginEnd - в начале, конце и между
+ *
+ * array = [1,2,3]; join = `, `; beginEnd = `"` => "1", "2", "3"
+ * Удобно для генерации колонок в INSERT INTO
+*/
+function customJoin(array, join, beginEnd){
+    return beginEnd + array.join(beginEnd + join + beginEnd) + beginEnd;
+}
+
+function example(billIncomeType, projectId, profileIdCustomer, innCustomer, organisationCustomer, resNPDS) {
+    const columns = [ `billIncomeType`, `projectId`, `profileIdCustomer`, `innCustomer`, `organisationCustomer` ]; // столбцы-константы
+    const paramsInsertBills = [ billIncomeType, projectId, profileIdCustomer, innCustomer, organisationCustomer ]; // значения-константы, которые не меняются
+    const constParams = paramsInsertBills.length; // можно заменить и на columns.length. Количество констант
+
+    columns.push(`profileId`, `inn`, `billList`, `total`, `userId`); // динамичные столбцы
+
+    for (const npd of resNPDS.rows) {
+        // ...
+        // закидываем параметры в соответствии с названиями динамичных столбцов выше
+        paramsInsertBills.push(npd.profileId, npd.inn, JSON.stringify(services), npd.income, npd.userId);
+    }
+    
+    const queryInsertBills = `INSERT INTO npdbills (` + helpers.customJoin(columns, ', ', '"') + ') VALUES ' + helpers.valuesInsertIntoV2(paramsInsertBills.length, columns.length, constParams) + ' RETURNING id';
+}
